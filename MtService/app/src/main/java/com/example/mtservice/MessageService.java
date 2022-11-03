@@ -11,6 +11,8 @@ import android.os.Message;
 import android.os.Messenger;
 import android.widget.Toast;
 
+// https://developer.android.com/guide/components/bound-services#Messenger
+
 /** Very simple service that uses interprocess comms */
 public class MessageService extends Service {
 

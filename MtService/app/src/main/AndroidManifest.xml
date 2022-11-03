@@ -8,12 +8,13 @@
         android:supportsRtl="true"
         tools:targetApi="33">
         <service
-            android:name=".MessageService"
+            android:name="com.example.mtservice.MessageService"
             android:exported="true"
             android:enabled="true"
+            android:isolatedProcess="true"
             android:externalService="true"
             android:description="@string/service_description"
-            android:permission="TestPermission" />
+            tools:ignore="ExportedService" />
 
     </application>
 
