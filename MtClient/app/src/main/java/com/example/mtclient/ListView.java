@@ -26,11 +26,16 @@ public class ListView extends View {
     @Override
     public void onDrawForeground(final Canvas canvas) {
         canvas.drawARGB(255, 0,0,0);
-        mPaint.setARGB(255, 255, 128, 32);
         mPaint.setTextSize(50);
 
         float y = offset + scrollY;
         for(String pkg : _names) {
+            if (pkg == null) continue;
+            if (pkg.contains("mtservice"))
+                mPaint.setARGB(255, 255, 255, 255);
+            else
+                mPaint.setARGB(255, 255, 128, 32);
+
             canvas.drawText(pkg, 0.0f, y, mPaint);
             y+=50;
         }

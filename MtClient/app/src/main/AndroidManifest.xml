@@ -25,5 +25,7 @@
                 android:value="" />
         </activity>
     </application>
-
+<queries>
+    <package android:name="com.example.mtservice" />
+</queries>
 </manifest>
