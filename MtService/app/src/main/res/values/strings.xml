@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MtService</string>
+    <string name="service_description">A test service</string>
+</resources>
