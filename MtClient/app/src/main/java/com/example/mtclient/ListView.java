@@ -2,36 +2,48 @@ package com.example.mtclient;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageInfo;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressLint("ViewConstructor")
 public class ListView extends View {
     private final Paint mPaint = new Paint();
-    private final List<String> _names = new LinkedList<>();
+    private final List<String> _names = new ArrayList<>();
     private float touchY = 0.0f;
     private float scrollY = 0.0f;
     private float offset = 0.0f;
+    private final MainActivity parent;
 
-    public ListView(Context context) {
+    public ListView(MainActivity context) {
         super(context);
+        parent = context;
     }
 
     @Override
     public void onDrawForeground(final Canvas canvas) {
         canvas.drawARGB(255, 0,0,0);
+        mPaint.setARGB(255, 255, 255, 0);
         mPaint.setTextSize(50);
+        //_names.sort(String::compareTo);
+        float y = 50 + offset + scrollY;
 
-        float y = offset + scrollY;
+        if (parent.mService == null){
+            canvas.drawText("Service is null", 0.0f, y, mPaint);
+            y+=50;
+        }
+        if (!parent.bound){
+            canvas.drawText("Service is not bound", 0.0f, y, mPaint);
+            y+=50;
+        }
+
         for(String pkg : _names) {
             if (pkg == null) continue;
-            if (pkg.contains("mtservice"))
+            if (pkg.contains("example.mt"))
                 mPaint.setARGB(255, 255, 255, 255);
             else
                 mPaint.setARGB(255, 255, 128, 32);
