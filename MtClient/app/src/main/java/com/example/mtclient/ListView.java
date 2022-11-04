@@ -32,15 +32,6 @@ public class ListView extends View {
         //_names.sort(String::compareTo);
         float y = 50 + offset + scrollY;
 
-        if (parent.mService == null){
-            canvas.drawText("Service is null", 0.0f, y, mPaint);
-            y+=50;
-        }
-        if (!parent.bound){
-            canvas.drawText("Service is not bound", 0.0f, y, mPaint);
-            y+=50;
-        }
-
         for(String pkg : _names) {
             if (pkg == null) continue;
             if (pkg.contains("example.mt"))
@@ -77,5 +68,6 @@ public class ListView extends View {
 
     public void add(String packageName) {
         _names.add(packageName);
+        invalidate(); // draw a frame
     }
 }

@@ -23,7 +23,7 @@ public class TestContentProvider extends ContentProvider {
         // Implement this to handle requests for the MIME type of the data
         // at the given URI.
         Log.i(TAG, "type request: "+uri.toString());
-        return "application/octet-stream";
+        return "application/mt-twin-custom";
     }
 
     @Override

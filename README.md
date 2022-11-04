@@ -19,3 +19,4 @@ https://www.dev2qa.com/android-content-provider-and-contentresolver-example/
 https://developer.android.com/guide/components/bound-services
 https://android.googlesource.com/platform/development/+/master/samples/ApiDemos/src/com/example/android/apis/app/MessengerService.java
 https://android.googlesource.com/platform/development/+/master/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.java
+https://www.programmerall.com/article/83611057030/

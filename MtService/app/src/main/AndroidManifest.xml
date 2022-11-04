@@ -3,8 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.mtservice">
 
+    <!--
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.BIND_EXTERNAL_SERVICE" />
+-->
 
     <application
         android:enabled="true"
@@ -32,6 +35,22 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name="com.example.mtservice.RealMtAidlService"
+            android:description="@string/service_description"
+            android:enabled="true"
+            android:exported="true"
+            android:externalService="true"
+            android:isolatedProcess="true"
+            android:process="com.example.mt_twin"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="com.example.mtservice.IMtAidlInterface" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </service>
 
         <service
             android:name="com.example.mtservice.MessageService"

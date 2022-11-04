@@ -26,6 +26,7 @@
 
             <intent-filter>
                 <action android:name="com.example.mtservice.MessageService"/>
+                <action android:name="com.example.mtservice.IMtAidlInterface" />
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
             </intent-filter>

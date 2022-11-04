@@ -1,7 +1,6 @@
 package com.example.mtclient;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,20 +13,23 @@ import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Messenger;
-import android.util.Log;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 public class MainActivity extends Activity {
     private ListView v;
+    private final String TAG = "MtClient";
+
+    private com.example.mtservice.IMtAidlInterface iMyAid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         v = new ListView(this);
+
+        boolean ok =bindService();
+        v.add(ok ? "bind ok" : "bind fail :(");
 
         List<PackageInfo> pkgs = getPackageManager().getInstalledPackages(
                 PackageManager.GET_SERVICES +
@@ -55,108 +57,52 @@ public class MainActivity extends Activity {
                 }
             }
         }
-        v.add("...");
-        v.add("If this is the only message, check logs");
 
-        try {
-            boolean ok = bindMyService("com.example.mtservice",
-                   "CONNECT", "MessageService");
-            v.add("Binding did not fault");
-            v.add("ok="+ok);
-            v.add(_serviceConnection.toString());
-        } catch (Exception ex){
-            v.add("Binding failed");
-            v.add(ex.toString());
-            Log.e(TAG, ex.toString());
-        }
-
-        ActivityManager manager = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo serviceInfo : manager.getRunningServices(Integer.MAX_VALUE)) {
-            v.add(" -> "+serviceInfo.service.getClassName());
-        }
-
-        if (isServiceRunning("MessageService")) {
-            //bindMyService("com.example.mtservice","TWINS_INTENT", "MessageService");
-            v.add("Service is up!");
-        }
-        else {
-            v.add("Service is not running");
-        }
+        v.add((iMyAid==null ? "no conn" : "conn is up"));
 
         Uri contentUri = Uri.parse("content://com.example.mtservice/what-path");
-        //String whereClause = "id = ?";
-        //String placeHolderValueArr[] = {"1"}
         v.add("type says: "+getContentResolver().getType(contentUri));
 
         setContentView(v);
     }
 
-    private final String TAG = "MtClient";
-    /** Messenger for communicating with the service. */
-    public Messenger mService = null;
 
-    /** Flag indicating whether we have called bind on the service. */
-    public boolean bound;
-
-    private final ServiceConnection _serviceConnection = new ServiceConnection() {
-
+    private final ServiceConnection conn = new ServiceConnection() {
         @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            // This is called when the connection with the service has been
-            // established, giving us the object we can use to
-            // interact with the service.  We are communicating with the
-            // service using a Messenger, so here we get a client-side
-            // representation of that from the raw IBinder object.
-            Log.w(TAG, "on service connected");
-            v.add("onServiceConnected touched");
-            mService = new Messenger(service);
-            bound = true;
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            v.add("touch: onServiceConnected");
+            iMyAid = com.example.mtservice.IMtAidlInterface.Stub.asInterface(iBinder);
+            v.add("AIDL bound: "+(iMyAid==null?"failed":"ok!"));
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName className) {
-            // This is called when the connection with the service has been
-            // unexpectedly disconnected -- that is, its process crashed.
-            v.add("onServiceDisconnected touched");
-            Log.w(TAG, "on service disconnected");
-            mService = null;
-            bound = false;
+        public void onServiceDisconnected(ComponentName componentName) {
+            v.add("touch: onServiceDisconnected");
+            iMyAid = null;
+            v.add("AIDL released");
         }
 
+        @Override
+        public void onBindingDied(ComponentName name) {
+            v.add("AIDL binding died");
+        }
+
+        @Override
+        public void onNullBinding(ComponentName name) {
+            v.add("AIDL binding was null");
+        }
     };
 
-    private boolean isServiceRunning(String classFragment) {
-        v.add("...services found: ");
-        // THIS DOESN'T SEEM TO WORK
-        ActivityManager manager = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo serviceInfo : manager.getRunningServices(Integer.MAX_VALUE)) {
-            v.add("rs> "+serviceInfo.service.getClassName());
-            if (serviceInfo.service.getClassName().contains(classFragment)) {
-                Log.w(TAG, serviceInfo.service.getClassName());
-                return true;
-            }
-        }
-        return false;
+
+    private boolean bindService() {
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName("com.example.mtservice", "com.example.mtservice.RealMtAidlService"));
+        return bindService(intent, conn, Context.BIND_EXTERNAL_SERVICE + Context.BIND_AUTO_CREATE);
     }
 
-    private boolean bindMyService(String namespace, String intentName, String className) {
-        Intent intent = new Intent(/*"a.b.c.MY_INTENT"*/ namespace +"."+intentName);
-        //Intent intent = new Intent(Intent.);
-        //Intent intent = new Intent(getApplicationContext(), );
-        //intent.setPackage(namespace/*"a.b.c"*/);
-        intent.setClassName(namespace, className);
-
-        //Intent intent = new Intent(namespace +"."+className,
-        //        Uri.parse("info://CallingOtherApplicationsActivity"));
-
-        //Intent intent = new Intent(intentName);
-        //intent.setPackage(namespace);
-        //intent.setAction(className);
-
-        ComponentName cn = startService(intent);
-        v.add("cn? "+(cn==null?"nope":"yay!"));
-
-        //return bindService(intent, _serviceConnection, Context.BIND_AUTO_CREATE);
-        return bindService(intent, _serviceConnection, Context.BIND_EXTERNAL_SERVICE);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(conn);
     }
 }
