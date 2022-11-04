@@ -15,7 +15,7 @@ This is to allow 2 things:
 https://www.techotopia.com/index.php/Android_Remote_Bound_Services_%E2%80%93_A_Worked_Example
 https://developer.android.com/guide/topics/manifest/service-element.html#proc
 https://stackoverflow.com/questions/39728597/android-binding-to-a-remote-service
-
+https://www.dev2qa.com/android-content-provider-and-contentresolver-example/
 https://developer.android.com/guide/components/bound-services
 https://android.googlesource.com/platform/development/+/master/samples/ApiDemos/src/com/example/android/apis/app/MessengerService.java
 https://android.googlesource.com/platform/development/+/master/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.java
