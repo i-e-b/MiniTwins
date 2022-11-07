@@ -5,11 +5,49 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class TestContentProvider extends ContentProvider {
     private final String TAG = "TestCP";
     public TestContentProvider() {
+    }
+
+    @Override
+    public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
+        Log.i(TAG, "File requested: "+uri.toString());
+
+        try {
+            return getFileDescriptor("Hello, world. Here are some bytes! Enjoy them.".getBytes(StandardCharsets.UTF_8));
+        } catch(Exception ex){
+            throw new FileNotFoundException("Failure:"+ ex);
+        }
+    }
+
+    private ParcelFileDescriptor getFileDescriptor(byte[] fileData) throws IOException {
+        Log.d(TAG, "Found " + fileData.length + " bytes of data");
+        ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
+
+        // Stream the file data to our ParcelFileDescriptor output stream
+        InputStream inputStream = new ByteArrayInputStream(fileData);
+        ParcelFileDescriptor.AutoCloseOutputStream outputStream = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
+        int len;
+        while ((len = inputStream.read()) >= 0) {
+            outputStream.write(len);
+        }
+        inputStream.close();
+        outputStream.flush();
+        outputStream.close();
+
+        // Return the ParcelFileDescriptor input stream to the calling activity in order to read
+        // the file data.
+        return pipe[0];
     }
 
     @Override

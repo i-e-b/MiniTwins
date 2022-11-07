@@ -2,6 +2,7 @@ package com.example.mtclient;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -16,6 +17,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.List;
 
 public class MainActivity extends Activity {
@@ -59,16 +62,18 @@ public class MainActivity extends Activity {
             }
         }
 
+        ContentResolver cr = getContentResolver();
         v.add((iMyAid==null ? "waiting for conn" : "conn is up")); // the binding is async.
 
         // We select our data provider by url |------ here -------|
         Uri contentUri = Uri.parse("content://com.example.mtservice/what-path");
-        v.add("type says: "+getContentResolver().getType(contentUri)); // 'getType' calls com.example.mtservice.TestContentProvider#getType
+        v.add("type says: "+cr.getType(contentUri)); // 'getType' calls com.example.mtservice.TestContentProvider#getType
 
         String[] project = {"a","b"};
         String[] selArg = {"u","v"};
 
-        try (Cursor c = getContentResolver().query(contentUri, project, "mySelection", selArg, "order")) {
+        // Read from service using a cursor (as if it was a DB)
+        try (Cursor c = cr.query(contentUri, project, "mySelection", selArg, "order")) {
             if (c == null){
                 v.add("Cursor from provider is null");
             } else {
@@ -79,6 +84,22 @@ public class MainActivity extends Activity {
         } catch (Exception ex){
             Log.e(TAG, ex.toString());
             v.add("Error reading cursor: "+ex);
+        }
+
+        Uri uri2 = Uri.parse("content://com.example.mtservice/raw-data-please");
+        try {
+            InputStream inputStream = cr.openInputStream(uri2);
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            for (int length; (length = inputStream.read(buffer)) != -1; ) {
+                result.write(buffer, 0, length);
+            }
+            // StandardCharsets.UTF_8.name() > JDK 7
+            v.add(result.toString("UTF-8"));
+            inputStream.close();
+        } catch (Exception ex){
+            Log.e(TAG, ex.toString());
+            v.add("Error reading input stream: "+ex);
         }
 
         setContentView(v);

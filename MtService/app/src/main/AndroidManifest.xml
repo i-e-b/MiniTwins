@@ -40,22 +40,6 @@
             </intent-filter>
         </service>
 
-        <service
-            android:name="com.example.mtservice.MessageService"
-            android:description="@string/service_description"
-            android:enabled="true"
-            android:exported="true"
-            android:externalService="true"
-            android:isolatedProcess="false"
-            android:process="com.example.mt_twin"
-            tools:ignore="ExportedService">
-            <intent-filter>
-                <action android:name="com.example.mtservice.MessageService" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-            </intent-filter>
-        </service>
-
         <activity
             android:name=".DummyActivity"
             android:exported="true">
