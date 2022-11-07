@@ -3,6 +3,7 @@ package com.example.mtservice;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.net.Uri;
 import android.util.Log;
 
@@ -45,7 +46,12 @@ public class TestContentProvider extends ContentProvider {
                         String[] selectionArgs, String sortOrder) {
         // Implement this to handle query requests from clients.
         Log.i(TAG, "cursor request: "+uri.toString());
-        return null;
+
+        String[] cols = {"a", "b", "c"};
+        MatrixCursor c = new MatrixCursor(cols);
+        c.addRow(new Object[]{"one", "two", "three"});
+        c.addRow(new Object[]{"four", "five", "six"});
+        return c;
     }
 
     @Override

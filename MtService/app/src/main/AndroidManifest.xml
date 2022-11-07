@@ -3,11 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.mtservice">
 
-    <!--
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.BIND_EXTERNAL_SERVICE" />
--->
 
     <application
         android:enabled="true"
@@ -18,23 +15,14 @@
         android:supportsRtl="true"
         tools:targetApi="33">
 
+        <!--android:permission="com.example.mtservice.permission.READ_PROVIDER"-->
         <provider
             android:name="com.example.mtservice.TestContentProvider"
             android:authorities="com.example.mtservice"
             android:enabled="true"
             android:syncable="true"
             android:exported="true"
-            android:permission="com.example.mtservice.permission.READ_PROVIDER"
             tools:ignore="ExportedContentProvider"/>
-
-        <receiver
-            android:name=".BootBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
 
         <service
             android:name="com.example.mtservice.RealMtAidlService"

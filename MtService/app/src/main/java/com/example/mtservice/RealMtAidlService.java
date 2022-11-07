@@ -14,13 +14,19 @@ public class RealMtAidlService extends Service {
         return iBinder;
     }
 
-    private IBinder iBinder = new IMtAidlInterface.Stub(){
+    private final IBinder iBinder = new IMtAidlInterface.Stub(){
 
         @Override
         public int basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat,
                               double aDouble, String aString) throws RemoteException {
-            Log.e(TAG, "Woot");
+            Log.i(TAG, "Remote call to basicTypes");
             return 123;
+        }
+
+        @Override
+        public String getServiceVersion(){
+            Log.i(TAG, "Remote call to getServiceVersion");
+            return "MtService_1.0.0";
         }
     };
 
