@@ -39,17 +39,6 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </service>
-
-        <activity
-            android:name=".DummyActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.example.mtservice.CONNECT" />
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>

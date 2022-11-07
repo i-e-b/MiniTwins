@@ -1,5 +1,6 @@
 package com.example.mtclient;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -16,6 +17,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.ViewGroup;
+import android.webkit.WebView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -23,6 +26,7 @@ import java.util.List;
 
 public class MainActivity extends Activity {
     private ListView v;
+    private WebView view;
     private final String TAG = "MtClient";
 
     private com.example.mtservice.IMtAidlInterface iMyAid;
@@ -33,9 +37,15 @@ public class MainActivity extends Activity {
 
         boolean ok =bindService();
 
+        view = new WebView(this);
+        this.setContentView(view, new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        view.loadUrl("content://com.example.mtservice/test-web-file.html"); // try to load from our external content provider directly
+
         v = new ListView(this);
         v.add(ok ? "bind ok" : "bind fail :(");
 
+        @SuppressLint("QueryPermissionsNeeded") // we are requesting a specific package
         List<PackageInfo> pkgs = getPackageManager().getInstalledPackages(
                 PackageManager.GET_SERVICES +
                         PackageManager.GET_PROVIDERS +
@@ -102,7 +112,7 @@ public class MainActivity extends Activity {
             v.add("Error reading input stream: "+ex);
         }
 
-        setContentView(v);
+        //setContentView(v);
     }
 
 
