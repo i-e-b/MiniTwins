@@ -1,7 +1,6 @@
 package e.s.MtPluginTest;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.view.MotionEvent;
@@ -20,7 +19,7 @@ public class PluginView extends View {
     private final TestPlugin parent;
 
     public PluginView(TestPlugin context) {
-        super(context.parent);
+        super(context.parent.getHostActivity());
         parent = context;
     }
 

@@ -21,19 +21,24 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 
 import com.example.mtplug.IPlugin;
+import com.example.mtplug.IPluginHost;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import dalvik.system.PathClassLoader;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements IPluginHost {
     private ListView v;
     private WebView view;
     private final String TAG = "MtClient";
@@ -90,8 +95,6 @@ public class MainActivity extends Activity {
 
         tryRunPlugin(cr);
 
-
-
         // Read from service using a cursor (as if it was a DB)
         String[] project = {"a", "b"};
         String[] selArg = {"u", "v"};
@@ -129,35 +132,8 @@ public class MainActivity extends Activity {
 
     private void tryRunPlugin(ContentResolver cr){
         String className = "e.s.MtPluginTest.TestPlugin";
-        String methodToInvoke = "testMethod";
         String apkFile = "content://com.example.mtservice/plugin.apk";
         try {
-            // To try:
-            //    https://stackoverflow.com/a/40179430/423033
-            //    https://stackoverflow.com/a/4022071/423033
-            //    https://stackoverflow.com/a/25344068/423033
-            //    https://stackoverflow.com/q/35197171/423033
-            /*
-            PathClassLoader pathClassLoader = new dalvik.system.PathClassLoader(
-                    "content://com.example.mtservice/plugin.apk",
-                    ClassLoader.getSystemClassLoader());
-
-            // This should be loaded from the APK, possibly by the service -->  e.s.MtPluginTest.TestPlugin::testMethod
-            Class<?> handler = Class.forName("e.s.MtPluginTest.TestPlugin", true, pathClassLoader);
-*/
-
-            /*
-            final File optimizedDexOutputPath = getDir("outdex", 0);
-
-            DexClassLoader dLoader = new DexClassLoader(apkFile, optimizedDexOutputPath.getAbsolutePath(),
-                    null, ClassLoader.getSystemClassLoader().getParent());
-
-            Class<?> loadedClass = dLoader.loadClass(className);
-            Object obj = (Object)loadedClass.newInstance();
-            Method m = loadedClass.getMethod(methodToInvoke);
-            m.invoke(obj);
-             */
-
             // Before the secondary dex file can be processed by the DexClassLoader,
             // it has to be first copied from asset resource to a storage location.
             String hotFile = "plugin_hot.apk";
@@ -165,24 +141,33 @@ public class MainActivity extends Activity {
             File dexInternalStoragePath = new File(targetPath, hotFile);
             copyFromServerToFile(cr, apkFile, dexInternalStoragePath);
 
+            String pluginTxt = getStringFromStream(getInputStreamFromApkResource(
+                    dexInternalStoragePath.getAbsolutePath(), "assets/plugin.txt"));
+            Log.i(TAG, "Plugin manifest: " + pluginTxt);
+
             PathClassLoader loader = new PathClassLoader(dexInternalStoragePath.getAbsolutePath(), getClassLoader());
             Class<?> loadedClass = loader.loadClass(className);
             IPlugin obj = (IPlugin)loadedClass.newInstance();
             obj.RunActivity(this, this::onPluginFinished);
-            //Method m = loadedClass.getMethod(methodToInvoke);
-            //m.invoke(obj);
-            /*
-            final File optimizedDexOutputPath = getDir("outdex", 0);
-            DexClassLoader dLoader = new DexClassLoader(dexInternalStoragePath.getAbsolutePath(),
-                    optimizedDexOutputPath.getAbsolutePath(), targetPath.getAbsolutePath(),
-                    ClassLoader.getSystemClassLoader().getParent());
-
-            Class<?> loadedClass = dLoader.loadClass(className);
-            Object obj = (Object)loadedClass.newInstance();
-            Method m = loadedClass.getMethod(methodToInvoke);
-            m.invoke(obj);*/
         } catch (Exception ex){
             Log.e(TAG, "Failed to run plugin: "+ex);
+        }
+    }
+
+    private String getStringFromStream(InputStream stream) throws IOException {
+        BufferedInputStream bis = new BufferedInputStream(stream);
+        try {
+            StringBuilder output = new StringBuilder();
+
+            byte[] buf = new byte[4096];
+            int len;
+            while ((len = bis.read(buf, 0, 4096)) > 0) {
+                output.append(new String(buf, 0, len, StandardCharsets.UTF_8));
+            }
+            return output.toString();
+        } finally {
+            bis.close();
+            stream.close();
         }
     }
 
@@ -191,6 +176,12 @@ public class MainActivity extends Activity {
         // Restore our own view
         this.setContentView(view);
         Log.i(TAG, "State restored");
+    }
+
+    public static InputStream getInputStreamFromApkResource(String apkFilePath, String apkResPath) throws IOException {
+        JarFile jarFile = new JarFile(apkFilePath);
+        JarEntry jarEntry = jarFile.getJarEntry(apkResPath);
+        return jarFile.getInputStream(jarEntry);
     }
 
     /** Read a file from the server to our app's internals */
@@ -258,5 +249,27 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(conn);
+    }
+
+    @Override
+    public Activity getHostActivity() {return this;}
+
+    @Override
+    public byte[] getBinaryAssetFile(String assetPath) throws IOException {
+        return null;
+    }
+
+    @Override
+    public InputStream getBinaryAssetStream(String assetPath) throws IOException {
+        return null;
+    }
+
+    @Override
+    public String getTextAssetFile(String assetPath) throws IOException {
+        String hotFile = "plugin_hot.apk";
+        File targetPath = getDir("dex", Context.MODE_PRIVATE);
+        File dexInternalStoragePath = new File(targetPath, hotFile);
+        return getStringFromStream(getInputStreamFromApkResource(
+                    dexInternalStoragePath.getAbsolutePath(), "assets/plugin.txt"));
     }
 }

@@ -1,0 +1,4 @@
+# This is the text file FROM THE HOST APP
+# You should load plug-in resources from
+# the plug-ins own APK, which the host app
+# should give access to.
