@@ -1,7 +1,6 @@
 package com.example.mtplug;
 
-import android.app.Activity;
-
+@SuppressWarnings("unused")
 public interface IPlugin {
-    Object RunActivity(Activity parent);
+    void RunActivity(android.app.Activity parent, Runnable onFinished);
 }

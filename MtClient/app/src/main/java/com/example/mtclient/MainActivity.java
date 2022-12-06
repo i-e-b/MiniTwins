@@ -29,10 +29,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.util.List;
 
-import dalvik.system.DexClassLoader;
 import dalvik.system.PathClassLoader;
 
 public class MainActivity extends Activity {
@@ -170,7 +168,7 @@ public class MainActivity extends Activity {
             PathClassLoader loader = new PathClassLoader(dexInternalStoragePath.getAbsolutePath(), getClassLoader());
             Class<?> loadedClass = loader.loadClass(className);
             IPlugin obj = (IPlugin)loadedClass.newInstance();
-            obj.RunActivity(this);
+            obj.RunActivity(this, this::onPluginFinished);
             //Method m = loadedClass.getMethod(methodToInvoke);
             //m.invoke(obj);
             /*
@@ -186,6 +184,13 @@ public class MainActivity extends Activity {
         } catch (Exception ex){
             Log.e(TAG, "Failed to run plugin: "+ex);
         }
+    }
+
+    public void onPluginFinished(){
+        Log.i(TAG, "Plugin is ending, has asked us to restore state");
+        // Restore our own view
+        this.setContentView(view);
+        Log.i(TAG, "State restored");
     }
 
     /** Read a file from the server to our app's internals */
