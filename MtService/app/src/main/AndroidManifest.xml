@@ -8,6 +8,7 @@
 
     <application
         android:enabled="true"
+        android:hasFragileUserData="true"
         android:forceQueryable="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

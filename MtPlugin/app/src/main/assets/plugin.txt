@@ -1,0 +1,4 @@
+# This is the plugin definition file
+# List out the class paths and methods that should be exposed.
+# Make sure these are NOT modified by proguard or similar.
+e.s.MtPluginTest.TestPlugin::testMethod

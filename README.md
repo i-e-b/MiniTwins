@@ -10,6 +10,11 @@ This is to allow 2 things:
 1. Very small APK download when updating business logic
 2. Harder for users to accidentally lose data when uninstalling apps
 
+## Plugins
+
+Concept: a small APK, which will be stored or downloaded. This will have a standard file
+somewhere inside it, and we will use that to load Dalvik classes and run them.
+
 ### Link spam
 
 https://www.techotopia.com/index.php/Android_Remote_Bound_Services_%E2%80%93_A_Worked_Example

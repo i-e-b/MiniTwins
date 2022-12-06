@@ -2,6 +2,7 @@ package com.example.mtservice;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
@@ -62,6 +63,11 @@ public class TestContentProvider extends ContentProvider {
                             "</body>\n" +
                             "</html>");
 
+                case "/plugin.apk":{
+                    AssetManager mgr = getContext().getAssets();
+                    return streamToFile(mgr.open("plugin.apk"));
+                }
+
                 default:
                     Log.e(TAG, "Path failed: "+path);
                     return strToFile("Not a real file: "+path);
@@ -116,7 +122,8 @@ public class TestContentProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
         // Implement this to handle query requests from clients.
-        Log.i(TAG, "cursor request: "+uri.toString());
+        String url = uri.toString();
+        Log.i(TAG, "cursor request: "+url);
 
         String[] cols = {"a", "b", "c"};
         MatrixCursor c = new MatrixCursor(cols);
@@ -135,6 +142,22 @@ public class TestContentProvider extends ContentProvider {
 
     private ParcelFileDescriptor strToFile(String str) throws IOException{
         return getFileDescriptor(str.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private ParcelFileDescriptor streamToFile(InputStream inputStream) throws IOException {
+        ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
+
+        // Stream the file data to our ParcelFileDescriptor output stream
+        ParcelFileDescriptor.AutoCloseOutputStream outputStream =
+                new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
+        int len;
+        while ((len = inputStream.read()) >= 0) outputStream.write(len);inputStream.close();
+        outputStream.flush();
+        outputStream.close();
+
+        // return ParcelFileDescriptor input stream to the
+        // calling activity in order to read the file data.
+        return pipe[0];
     }
 
     private ParcelFileDescriptor getFileDescriptor(byte[] fileData) throws IOException {
